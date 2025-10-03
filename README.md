@@ -8,7 +8,7 @@
 
 **The world's first AI-driven urban planning ecosystem that democratizes climate science for resilient city development.**
 
-Oasis Platform is a comprehensive, production-ready application that transforms complex Earth observation data into actionable urban planning insights. Built for the NASA Space Apps Challenge 2024, it demonstrates how satellite data, AI agents, and community engagement can accelerate climate-resilient urban development worldwide.
+Oasis Platform is a comprehensive, production-ready application that transforms complex Earth observation data into actionable urban planning insights. Built for the NASA Space Apps Challenge 2025, it demonstrates how satellite data, AI agents, and community engagement can accelerate climate-resilient urban development worldwide.
 
 ---
 
