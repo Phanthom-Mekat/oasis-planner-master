@@ -1,0 +1,54 @@
+{
+  "timestamp": "2025-10-03T12:18:21.477209",
+  "test_parameters": {
+    "dhaka_coords": {
+      "lat": 23.8103,
+      "lon": 90.4125
+    },
+    "bangladesh_bbox": "88,20,93,27",
+    "test_date": "2024-01-01",
+    "end_date": "2024-01-31"
+  },
+  "tool_responses": {
+    "satellite_imagery": {
+      "tool": "get_city_satellite_imagery",
+      "error": "BaseTool.__call__() got an unexpected keyword argument 'lat'",
+      "success": false
+    },
+    "natural_disasters": {
+      "tool": "get_natural_disasters",
+      "error": "BaseTool.__call__() got an unexpected keyword argument 'days'",
+      "success": false
+    },
+    "air_quality": {
+      "tool": "analyze_air_quality_trends",
+      "error": "BaseTool.__call__() got an unexpected keyword argument 'lat'",
+      "success": false
+    },
+    "heat_islands": {
+      "tool": "assess_urban_heat_islands",
+      "error": "BaseTool.__call__() got an unexpected keyword argument 'lat'",
+      "success": false
+    },
+    "urban_sprawl": {
+      "tool": "monitor_urban_sprawl",
+      "error": "BaseTool.__call__() got an unexpected keyword argument 'city_name'",
+      "success": false
+    },
+    "flood_risk": {
+      "tool": "analyze_flood_risk_zones",
+      "error": "BaseTool.__call__() got an unexpected keyword argument 'city_name'",
+      "success": false
+    },
+    "green_space": {
+      "tool": "assess_green_space_distribution",
+      "error": "BaseTool.__call__() got an unexpected keyword argument 'city_name'",
+      "success": false
+    },
+    "nighttime_lights": {
+      "tool": "analyze_nighttime_lights",
+      "error": "BaseTool.__call__() got an unexpected keyword argument 'city_name'",
+      "success": false
+    }
+  }
+}

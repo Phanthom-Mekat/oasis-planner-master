@@ -1,0 +1,21 @@
+# Core Framework
+fastapi==0.115.5
+uvicorn[standard]==0.34.0
+pydantic==2.10.3
+pydantic-settings==2.7.0
+
+# NASA Data Processing
+h5py==3.12.1
+numpy==2.2.1
+rasterio==1.4.3
+pyproj==3.7.0
+pyhdf==0.11.6
+
+# Transport Network Analysis (OpenStreetMap)
+osmnx==1.9.4
+networkx==3.4.2
+geopandas==1.0.1
+shapely==2.0.6
+
+# Environment Variables
+python-dotenv==1.0.1

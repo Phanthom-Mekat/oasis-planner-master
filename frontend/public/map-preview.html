@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet Map Preview</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+        #mapContainer {
+            width: 100%;
+            height: 600px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .control-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #f0f0f0;
+        }
+        button.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.95);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 300px;
+        }
+        .legend h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌍 Oasis Climate Map - Leaflet Preview</h1>
+    
+    <div class="controls">
+        <h3>Map Controls</h3>
+        
+        <div class="control-group">
+            <label>Map View:</label>
+            <button onclick="changeMapView('street')" id="btn-street" class="active">Street</button>
+            <button onclick="changeMapView('satellite')" id="btn-satellite">Satellite</button>
+            <button onclick="changeMapView('terrain')" id="btn-terrain">Terrain</button>
+        </div>
+        
+        <div class="control-group">
+            <label>Climate Layers:</label>
+            <button onclick="toggleLayer('temperature')" id="btn-temperature" class="active">🌡️ Heat Islands</button>
+            <button onclick="toggleLayer('vegetation')" id="btn-vegetation">🌳 Green Cover</button>
+            <button onclick="toggleLayer('flood')" id="btn-flood">🌊 Flood Risk</button>
+            <button onclick="toggleLayer('air_quality')" id="btn-air_quality">💨 Air Quality</button>
+        </div>
+    </div>
+    
+    <div id="mapContainer"></div>
+    
+    <div class="legend">
+        <h4>🏙️ Major Cities</h4>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #dc2626;"></div>
+            <span>Critical Risk</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ea580c;"></div>
+            <span>High Risk</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #3b82f6;"></div>
+            <span>Medium Risk</span>
+        </div>
+    </div>
+
+    <script>
+        // Initialize map
+        let map = L.map('mapContainer').setView([20.0, 85.0], 4);
+        let currentTileLayer = null;
+        let markersLayer = L.layerGroup().addTo(map);
+        let overlaysLayer = L.layerGroup().addTo(map);
+        let activeLayers = new Set(['temperature']);
+
+        // Tile layers
+        const tileLayers = {
+            street: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }),
+            satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: '© Esri'
+            }),
+            terrain: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenTopoMap'
+            })
+        };
+
+        // Major cities data
+        const majorCities = [
+            { 
+                name: 'Dhaka', country: 'Bangladesh',
+                lat: 23.8103, lng: 90.4125,
+                population: '9.4M', temperature: 34.2, aqi: 165,
+                riskLevel: 'high', icon: '🏙️'
+            },
+            { 
+                name: 'Mumbai', country: 'India',
+                lat: 19.0760, lng: 72.8777,
+                population: '20.4M', temperature: 32.8, aqi: 142,
+                riskLevel: 'high', icon: '🌆'
+            },
+            { 
+                name: 'Delhi', country: 'India',
+                lat: 28.7041, lng: 77.1025,
+                population: '32.9M', temperature: 35.6, aqi: 178,
+                riskLevel: 'critical', icon: '🏛️'
+            },
+            { 
+                name: 'Karachi', country: 'Pakistan',
+                lat: 24.8607, lng: 67.0011,
+                population: '16.1M', temperature: 33.1, aqi: 156,
+                riskLevel: 'high', icon: '🏢'
+            },
+            { 
+                name: 'Jakarta', country: 'Indonesia',
+                lat: -6.2088, lng: 106.8456,
+                population: '10.8M', temperature: 31.9, aqi: 134,
+                riskLevel: 'medium', icon: '🌴'
+            },
+            { 
+                name: 'Manila', country: 'Philippines',
+                lat: 14.5995, lng: 120.9842,
+                population: '14.2M', temperature: 32.5, aqi: 148,
+                riskLevel: 'high', icon: '🏝️'
+            }
+        ];
+
+        // Initialize with street view
+        changeMapView('street');
+
+        function changeMapView(viewType) {
+            // Remove current layer
+            if (currentTileLayer) {
+                map.removeLayer(currentTileLayer);
+            }
+            
+            // Add new layer
+            currentTileLayer = tileLayers[viewType];
+            currentTileLayer.addTo(map);
+            
+            // Update button states
+            document.querySelectorAll('[id^="btn-"]').forEach(btn => {
+                if (btn.id.includes(viewType)) {
+                    btn.classList.add('active');
+                } else if (btn.id.includes('street') || btn.id.includes('satellite') || btn.id.includes('terrain')) {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        function toggleLayer(layerType) {
+            const btn = document.getElementById(`btn-${layerType}`);
+            
+            if (activeLayers.has(layerType)) {
+                activeLayers.delete(layerType);
+                btn.classList.remove('active');
+            } else {
+                activeLayers.add(layerType);
+                btn.classList.add('active');
+            }
+            
+            updateOverlays();
+        }
+
+        function addCityMarkers() {
+            markersLayer.clearLayers();
+            
+            majorCities.forEach(city => {
+                const iconColor = city.riskLevel === 'critical' ? '#dc2626' : 
+                                 city.riskLevel === 'high' ? '#ea580c' : '#3b82f6';
+                
+                const customIcon = L.divIcon({
+                    html: `
+                        <div style="position: relative; width: 40px; height: 40px;">
+                            <div style="
+                                position: absolute;
+                                top: 50%; left: 50%;
+                                transform: translate(-50%, -50%);
+                                width: 30px; height: 30px;
+                                background: white;
+                                border: 3px solid ${iconColor};
+                                border-radius: 50%;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-size: 14px;
+                                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                                z-index: 100;
+                            ">${city.icon}</div>
+                            <div class="pulse" style="
+                                position: absolute;
+                                top: 50%; left: 50%;
+                                transform: translate(-50%, -50%);
+                                width: 40px; height: 40px;
+                                border-radius: 50%;
+                                background: ${iconColor}30;
+                            "></div>
+                        </div>
+                    `,
+                    className: 'custom-city-marker',
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 20]
+                });
+
+                const marker = L.marker([city.lat, city.lng], { icon: customIcon })
+                    .bindPopup(createCityPopup(city), {
+                        maxWidth: 400,
+                        className: 'custom-popup'
+                    });
+
+                markersLayer.addLayer(marker);
+            });
+        }
+
+        function createCityPopup(city) {
+            const riskColor = city.riskLevel === 'critical' ? '#dc2626' : 
+                             city.riskLevel === 'high' ? '#ea580c' : '#16a34a';
+            
+            return `
+                <div style="padding: 16px; min-width: 300px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                        <div style="
+                            width: 48px; height: 48px;
+                            background: ${riskColor}20;
+                            border: 2px solid ${riskColor};
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 20px;
+                        ">${city.icon}</div>
+                        <div>
+                            <h3 style="margin: 0; font-size: 18px; font-weight: 700;">${city.name}</h3>
+                            <p style="margin: 4px 0 0 0; color: #666; font-size: 12px;">${city.country} • ${city.population}</p>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #f9fafb; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: center;">
+                            <div>
+                                <div style="font-size: 20px; font-weight: 700; color: #dc2626;">${city.temperature}°C</div>
+                                <div style="font-size: 10px; color: #666;">Temperature</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 20px; font-weight: 700; color: #ea580c;">${city.aqi}</div>
+                                <div style="font-size: 10px; color: #666;">Air Quality</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center;">
+                        <span style="
+                            padding: 4px 8px;
+                            background: ${riskColor}20;
+                            color: ${riskColor};
+                            border-radius: 12px;
+                            font-size: 10px;
+                            font-weight: 600;
+                            text-transform: uppercase;
+                        ">${city.riskLevel} Risk</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateOverlays() {
+            overlaysLayer.clearLayers();
+
+            // Temperature heat islands
+            if (activeLayers.has('temperature')) {
+                majorCities.forEach(city => {
+                    const heatCircle = L.circle([city.lat, city.lng], {
+                        color: '#dc2626',
+                        fillColor: '#ef4444',
+                        fillOpacity: 0.3,
+                        radius: 80000
+                    }).bindPopup(`🌡️ Heat Island: ${city.temperature}°C`);
+                    
+                    overlaysLayer.addLayer(heatCircle);
+                });
+            }
+
+            // Vegetation
+            if (activeLayers.has('vegetation')) {
+                const vegAreas = [
+                    { lat: 23.7, lng: 90.3, coverage: 85 },
+                    { lat: 19.1, lng: 72.9, coverage: 92 },
+                    { lat: 28.6, lng: 77.2, coverage: 78 }
+                ];
+
+                vegAreas.forEach(area => {
+                    const vegCircle = L.circle([area.lat, area.lng], {
+                        color: '#16a34a',
+                        fillColor: '#22c55e',
+                        fillOpacity: 0.4,
+                        radius: 60000
+                    }).bindPopup(`🌳 Green Cover: ${area.coverage}%`);
+                    
+                    overlaysLayer.addLayer(vegCircle);
+                });
+            }
+
+            // Flood risk
+            if (activeLayers.has('flood')) {
+                const floodZones = [
+                    { lat: 23.9, lng: 90.5, risk: 'high' },
+                    { lat: 19.0, lng: 72.7, risk: 'medium' },
+                    { lat: -6.3, lng: 106.9, risk: 'high' }
+                ];
+
+                floodZones.forEach(zone => {
+                    const floodCircle = L.circle([zone.lat, zone.lng], {
+                        color: '#2563eb',
+                        fillColor: '#3b82f6',
+                        fillOpacity: zone.risk === 'high' ? 0.5 : 0.3,
+                        radius: 70000,
+                        dashArray: '10, 10'
+                    }).bindPopup(`🌊 Flood Risk: ${zone.risk.toUpperCase()}`);
+                    
+                    overlaysLayer.addLayer(floodCircle);
+                });
+            }
+
+            // Air quality
+            if (activeLayers.has('air_quality')) {
+                majorCities.forEach(city => {
+                    const color = city.aqi > 150 ? '#dc2626' : city.aqi > 100 ? '#ea580c' : '#16a34a';
+                    
+                    const aqiMarker = L.circleMarker([city.lat, city.lng], {
+                        color: 'white',
+                        fillColor: color,
+                        fillOpacity: 0.8,
+                        radius: 8,
+                        weight: 2
+                    }).bindPopup(`💨 AQI: ${city.aqi}`);
+                    
+                    overlaysLayer.addLayer(aqiMarker);
+                });
+            }
+        }
+
+        // Initialize cities and overlays
+        addCityMarkers();
+        updateOverlays();
+
+        console.log('🌍 Leaflet Climate Map loaded successfully!');
+        console.log('✅ Cities:', majorCities.length);
+        console.log('🔧 Active layers:', Array.from(activeLayers));
+    </script>
+</body>
+</html>

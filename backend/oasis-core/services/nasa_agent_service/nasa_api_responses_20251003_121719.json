@@ -1,0 +1,166 @@
+{
+  "timestamp": "2025-10-03T12:17:03.905801",
+  "test_parameters": {
+    "dhaka_coords": {
+      "lat": 23.8103,
+      "lon": 90.4125
+    },
+    "bangladesh_bbox": "88,20,93,27",
+    "nasa_api_key": "6hVAPnmzFo..."
+  },
+  "api_tests": {
+    "earth_imagery": {
+      "api": "Earth Imagery",
+      "error": "HTTPSConnectionPool(host='api.nasa.gov', port=443): Read timed out. (read timeout=10)",
+      "success": false
+    },
+    "eonet_disasters": {
+      "api": "EONET Disasters",
+      "url": "https://eonet.gsfc.nasa.gov/api/v3/events?days=30&status=open",
+      "status_code": 200,
+      "data_structure": {
+        "type": "dict",
+        "keys": [
+          "title",
+          "description",
+          "link",
+          "events"
+        ],
+        "events_count": 62
+      },
+      "sample_event": {
+        "id": "EONET_15658",
+        "title": "Typhoon Matmo",
+        "description": null,
+        "link": "https://eonet.gsfc.nasa.gov/api/v3/events/EONET_15658",
+        "closed": null,
+        "categories": [
+          {
+            "id": "severeStorms",
+            "title": "Severe Storms"
+          }
+        ],
+        "sources": [
+          {
+            "id": "JTWC",
+            "url": "https://www.metoc.navy.mil/jtwc/products/wp2725.tcw"
+          }
+        ],
+        "geometry": [
+          {
+            "magnitudeValue": 35.0,
+            "magnitudeUnit": "kts",
+            "date": "2025-10-01T18:00:00Z",
+            "type": "Point",
+            "coordinates": [
+              128.3,
+              14.5
+            ]
+          },
+          {
+            "magnitudeValue": 45.0,
+            "magnitudeUnit": "kts",
+            "date": "2025-10-02T00:00:00Z",
+            "type": "Point",
+            "coordinates": [
+              127,
+              15.2
+            ]
+          },
+          {
+            "magnitudeValue": 45.0,
+            "magnitudeUnit": "kts",
+            "date": "2025-10-02T06:00:00Z",
+            "type": "Point",
+            "coordinates": [
+              126.5,
+              15.2
+            ]
+          },
+          {
+            "magnitudeValue": 50.0,
+            "magnitudeUnit": "kts",
+            "date": "2025-10-02T12:00:00Z",
+            "type": "Point",
+            "coordinates": [
+              125,
+              15.6
+            ]
+          },
+          {
+            "magnitudeValue": 55.0,
+            "magnitudeUnit": "kts",
+            "date": "2025-10-02T18:00:00Z",
+            "type": "Point",
+            "coordinates": [
+              123.7,
+              16
+            ]
+          },
+          {
+            "magnitudeValue": 65.0,
+            "magnitudeUnit": "kts",
+            "date": "2025-10-03T00:00:00Z",
+            "type": "Point",
+            "coordinates": [
+              122.6,
+              16.4
+            ]
+          }
+        ]
+      },
+      "success": true
+    },
+    "nasa_image_search": {
+      "api": "NASA Image Search",
+      "url": "https://images-api.nasa.gov/search?q=Dhaka+Bangladesh&media_type=image",
+      "status_code": 200,
+      "data_structure": {
+        "type": "dict",
+        "keys": [
+          "collection"
+        ]
+      },
+      "collection_info": {
+        "version": "1.1",
+        "href": "http://images-api.nasa.gov/search?q=Dhaka+Bangladesh&media_type=image",
+        "items": [],
+        "metadata": {
+          "total_hits": 0
+        }
+      },
+      "items_count": 0,
+      "sample_item": null,
+      "success": true
+    },
+    "apod": {
+      "api": "APOD",
+      "url": "https://api.nasa.gov/planetary/apod?api_key=6hVAPnmzFoh4oPyXalocM2ZGn2yc7SlCgyKEXCSS",
+      "status_code": 200,
+      "data_structure": {
+        "type": "dict",
+        "keys": [
+          "copyright",
+          "date",
+          "explanation",
+          "hdurl",
+          "media_type",
+          "service_version",
+          "title",
+          "url"
+        ]
+      },
+      "sample_data": {
+        "copyright": "\nBrian Meyers\n",
+        "date": "2025-10-01",
+        "explanation": "Ten thousand years ago, before the dawn of recorded human history, a new light would suddenly have appeared in the night sky and faded after a few weeks.  Today we know this light was from a supernova, or exploding star, and record the expanding debris cloud as the Veil Nebula, a supernova remnant.  This sharp telescopic view is centered on a western segment of the Veil Nebula cataloged as NGC 6960 but less formally known as the Witch's Broom Nebula.  Blasted out in the cataclysmic explosion, an interstellar shock wave plows through space sweeping up and exciting interstellar material. Imaged with narrow band filters, the glowing filaments are like long ripples in a sheet seen almost edge on, remarkably well separated into atomic hydrogen (red) and oxygen (blue-green) gas. The complete supernova remnant lies about 1400 light-years away towards the constellation Cygnus. This Witch's Broom actually spans about 35 light-years. The bright star in the frame is 52 Cygni, visible with the unaided eye from a dark location but unrelated to the ancient supernova remnant.",
+        "hdurl": "https://apod.nasa.gov/apod/image/2510/WitchBroom_Meyers_6043.jpg",
+        "media_type": "image",
+        "service_version": "v1",
+        "title": "Astronomy Picture of the Day",
+        "url": "https://apod.nasa.gov/apod/image/2510/WitchBroom_Meyers_1080.jpg"
+      },
+      "success": true
+    }
+  }
+}
